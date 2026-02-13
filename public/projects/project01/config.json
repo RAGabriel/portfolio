@@ -1,0 +1,39 @@
+
+{
+  "title": "Industrial IoT Monitoring System",
+  "category": "Embedded Systems",
+  "description": "A robust gateway based on ESP32 and LoRa for sensor monitoring in noisy industrial environments, focused on high availability and electromagnetic immunity. This project was developed to address the requirement for telemetry in a manufacturing plant where cabling was unfeasible. The system acts as a bridge between high-precision industrial sensors and a centralised cloud monitoring platform. Focus was placed on reliability and uptime, ensuring that even in the case of network fluctuations, data is buffered locally and re-synchronised once the connection is restored.",
+  "materials": "• Processor: ESP32-WROOM-32D (chosen for Dual-Core capabilities)\n• RF Module: SX1276 LoRa Transceiver (868MHz)\n• Power: Isolated DC-DC Converter (12V to 3.3V)\n• Stack: C++ (Arduino/ESP-IDF), FreeRTOS for task scheduling\n• Enclosure: IP67 Industrial rated with EMI shielding paint",
+  "results": "The prototype achieved a range of 2.4km in a dense urban environment with a packet error rate (PER) of less than 1.2%. We successfully monitored 14 different CNC machines simultaneously with a latency of < 500ms for critical alarms.",
+  "tech": [
+    "ESP32", 
+    "LoRaWAN", 
+    "C++", 
+    "MQTT", 
+    "KiCad", 
+    "FreeRTOS", 
+    "SPI", 
+    "I2C", 
+    "PCB Design", 
+    "Telemetry", 
+    "Industrial Automation",
+    "Digital Signal Processing",
+    "EMI/EMC Optimisation",
+    "Signal Integrity",
+    "Power Management",
+    "Embedded Security"
+  ],
+  "featuredImage": "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=1000",
+  "otherImages": [
+    "https://images.unsplash.com/photo-1555664424-778a1e5e1b48?auto=format&fit=crop&q=80&w=1000",
+    "https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?auto=format&fit=crop&q=80&w=1000",
+    "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&q=80&w=1000",
+    "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=1000",
+    "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=1000",
+    "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=1000",
+    "https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&q=80&w=1000",
+    "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&q=80&w=1000",
+    "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&q=80&w=1000"
+  ],
+  "githubUrl": "https://github.com/your-username/iot-project"
+}

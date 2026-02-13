@@ -1,0 +1,22 @@
+
+{
+  "title": "Programmable Bench Power Supply",
+  "category": "Hardware Design",
+  "description": "A high-precision DC power supply with digital control via encoder and OLED display, featuring low-noise linear regulation.",
+  "materials": "• Output Range: 0-30V / 0-5A\n• Control: Digital encoder interface with OLED feedback\n• Regulation: Low-noise linear regulation with < 1mV RMS ripple\n• Safety: Over-current and short-circuit protection implemented in hardware",
+  "results": "The biggest engineering challenge was thermal management. This was solved by implementing a smart ventilation control system that modulates fan speed based on heatsink temperature sensor data.",
+  "tech": ["Analogue Design", "Power Electronics", "Control Theory", "PCB Design", "LCD Interface"],
+  "featuredImage": "https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?auto=format&fit=crop&q=80&w=1000",
+  "otherImages": [
+    "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=1000",
+    "https://images.unsplash.com/photo-1555664424-778a1e5e1b48?auto=format&fit=crop&q=80&w=1000",
+    "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&q=80&w=1000",
+    "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=1000",
+    "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=1000",
+    "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=1000",
+    "https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&q=80&w=1000",
+    "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&q=80&w=1000",
+    "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&q=80&w=1000"
+  ],
+  "githubUrl": "https://github.com/your-username/power-supply"
+}
