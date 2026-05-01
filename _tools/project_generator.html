@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project Generator — Portfolio</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap');
+
+  :root {
+    --bg: #0d0d0f; --surface: #141416; --surface2: #1c1c20;
+    --border: #2a2a30; --border-hover: #3a3a44;
+    --green: #00ff88; --green-dim: #00ff8822; --green-mid: #00cc6a;
+    --text: #e8e8f0; --muted: #6b6b7a; --danger: #ff4466;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 40px 20px 80px; }
+
+  header { max-width: 820px; margin: 0 auto 48px; }
+  .logo { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--green); letter-spacing: .15em; text-transform: uppercase; margin-bottom: 14px; opacity: .7; }
+  h1 { font-size: clamp(28px, 5vw, 42px); font-weight: 800; line-height: 1.1; letter-spacing: -.02em; }
+  h1 em { color: var(--green); font-style: normal; }
+  .subtitle { margin-top: 10px; color: var(--muted); font-size: 15px; line-height: 1.6; }
+
+  .form-wrap { max-width: 820px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 28px 32px; transition: border-color .2s; }
+  .card:focus-within { border-color: var(--border-hover); }
+  .card-title { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--green); margin-bottom: 22px; }
+
+  .field { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+  .field:last-child { margin-bottom: 0; }
+  label { font-size: 13px; font-weight: 600; color: var(--muted); letter-spacing: .04em; }
+  label span { color: var(--danger); margin-left: 2px; }
+
+  input[type=text], input[type=url], input[type=number], textarea, select {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 10px;
+    color: var(--text); font-family: inherit; font-size: 14px; padding: 12px 16px;
+    width: 100%; transition: border-color .15s, box-shadow .15s; outline: none;
+  }
+  input:focus, textarea:focus, select:focus { border-color: var(--green-mid); box-shadow: 0 0 0 3px var(--green-dim); }
+  input::placeholder, textarea::placeholder { color: var(--muted); opacity: .6; }
+  textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
+
+  /* TAGS */
+  .tags-input-wrap { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; display: flex; flex-wrap: wrap; gap: 8px; cursor: text; transition: border-color .15s, box-shadow .15s; }
+  .tags-input-wrap:focus-within { border-color: var(--green-mid); box-shadow: 0 0 0 3px var(--green-dim); }
+  .tag-pill { background: var(--green-dim); border: 1px solid var(--green-mid); color: var(--green); border-radius: 6px; padding: 3px 10px; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+  .tag-pill button { background: none; border: none; cursor: pointer; color: var(--green); font-size: 14px; line-height: 1; padding: 0; opacity: .6; }
+  .tag-pill button:hover { opacity: 1; }
+  .tags-input-wrap input { background: none; border: none; outline: none; padding: 4px; font-size: 13px; color: var(--text); min-width: 120px; flex: 1; box-shadow: none; }
+  .tags-hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  /* IMAGES */
+  .image-drop { border: 2px dashed var(--border); border-radius: 12px; padding: 32px 20px; text-align: center; cursor: pointer; transition: border-color .2s, background .2s; }
+  .image-drop:hover, .image-drop.drag-over { border-color: var(--green-mid); background: var(--green-dim); }
+  .image-drop input { display: none; }
+  .image-drop-icon { font-size: 32px; margin-bottom: 10px; }
+  .image-drop p { font-size: 14px; color: var(--muted); }
+  .image-drop strong { color: var(--green); }
+  .image-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-top: 16px; }
+  .image-thumb { position: relative; aspect-ratio: 16/9; border-radius: 10px; overflow: hidden; border: 2px solid var(--border); background: var(--surface2); cursor: pointer; transition: border-color .15s; }
+  .image-thumb:hover { border-color: var(--border-hover); }
+  .image-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .image-thumb .remove-btn { position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,.7); border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 13px; opacity: 0; transition: opacity .15s; }
+  .image-thumb:hover .remove-btn { opacity: 1; }
+  .image-thumb.featured { border-color: var(--green); }
+  .featured-badge { position: absolute; bottom: 5px; left: 5px; background: var(--green); color: #000; font-size: 9px; font-weight: 700; letter-spacing: .08em; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; font-family: 'JetBrains Mono', monospace; }
+  .images-hint { font-size: 12px; color: var(--muted); margin-top: 8px; }
+
+  /* BUTTON */
+  .generate-btn { background: var(--green); color: #000; border: none; border-radius: 12px; padding: 16px 40px; font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; width: 100%; transition: transform .15s, box-shadow .15s, background .15s; letter-spacing: .02em; }
+  .generate-btn:hover { background: #00ffaa; transform: translateY(-2px); box-shadow: 0 8px 24px #00ff8840; }
+  .generate-btn:active { transform: translateY(0); }
+  .generate-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  /* OUTPUT */
+  #output { display: none; max-width: 820px; margin: 36px auto 0; flex-direction: column; gap: 20px; }
+  #output.visible { display: flex; }
+
+  .output-header { background: linear-gradient(135deg, #00ff8812, #00ff8804); border: 1px solid var(--green-mid); border-radius: 16px; padding: 24px 28px; }
+  .output-header h2 { font-size: 20px; font-weight: 800; margin-bottom: 6px; }
+  .output-header p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+  /* DOWNLOAD CARD */
+  .download-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px 28px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+  .download-info h3 { font-size: 15px; font-weight: 700; margin-bottom: 6px; font-family: 'JetBrains Mono', monospace; color: var(--green); }
+  .download-info p { font-size: 13px; color: var(--muted); }
+  .download-btn { background: var(--green); color: #000; border: none; border-radius: 10px; padding: 13px 28px; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: background .15s, transform .15s; }
+  .download-btn:hover { background: #00ffaa; transform: translateY(-1px); }
+
+  /* STEPS */
+  .steps-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 28px 32px; }
+  .steps-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 20px; }
+  .step { display: flex; gap: 16px; margin-bottom: 18px; align-items: flex-start; }
+  .step:last-child { margin-bottom: 0; }
+  .step-num { width: 28px; height: 28px; background: var(--green-dim); border: 1px solid var(--green-mid); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; color: var(--green); flex-shrink: 0; margin-top: 1px; }
+  .step-text { font-size: 14px; line-height: 1.6; color: var(--muted); }
+  .step-text strong { color: var(--text); }
+  .step-text code { font-family: 'JetBrains Mono', monospace; background: var(--surface2); border: 1px solid var(--border); border-radius: 5px; padding: 1px 7px; font-size: 12px; color: var(--green); }
+
+  /* MANIFEST */
+  .file-block { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+  .file-header { background: var(--surface2); padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
+  .file-path { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--green); letter-spacing: .04em; }
+  .copy-btn { background: var(--surface); border: 1px solid var(--border); border-radius: 7px; color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 11px; padding: 5px 12px; cursor: pointer; transition: all .15s; }
+  .copy-btn:hover { border-color: var(--green-mid); color: var(--green); }
+  .copy-btn.copied { border-color: var(--green); color: var(--green); }
+  pre { padding: 20px; overflow-x: auto; font-family: 'JetBrains Mono', monospace; font-size: 12.5px; line-height: 1.7; white-space: pre-wrap; word-break: break-all; color: #c8c8d8; max-height: 280px; overflow-y: auto; }
+
+  .id-preview { display: flex; align-items: center; gap: 10px; flex: 1; background: var(--green-dim); border: 1px solid var(--green-mid); border-radius: 10px; padding: 10px 16px; }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">// portfolio · project generator</div>
+  <h1>New <em>Project</em></h1>
+  <p class="subtitle">Fill in the fields, click generate and download the ZIP — just drag it into the repository and update the manifest.</p>
+</header>
+
+<div class="form-wrap">
+
+  <!-- 01 -->
+  <div class="card">
+    <div class="card-title">01 — Identification</div>
+
+    <div class="field">
+      <label>Last ID used <span>*</span><br><span style="font-weight:400;color:var(--muted)">What was the number of the last project added?</span></label>
+      <div style="display:flex;gap:12px;align-items:center">
+        <input type="number" id="lastId" min="0" value="4" style="width:120px;flex-shrink:0" oninput="updateNextId()" />
+        <div class="id-preview">
+          <span style="font-size:12px;color:var(--muted)">Next ID:</span>
+          <span id="nextIdDisplay" style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--green)">project05</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Project title <span>*</span></label>
+      <input type="text" id="title" placeholder="e.g. Industrial Monitoring System" />
+    </div>
+
+    <div class="field">
+      <label>Categoria <span>*</span></label>
+      <select id="category">
+        <option value="" disabled selected>Select a category…</option>
+        <option value="Embedded Systems">Embedded Systems</option>
+        <option value="Hardware Design">Hardware Design</option>
+        <option value="Mechanical Design">Mechanical Design</option>
+        <option value="Sensors">Sensors</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>GitHub link (optional)</label>
+      <input type="url" id="githubUrl" placeholder="https://github.com/seu-usuario/projeto" />
+    </div>
+  </div>
+
+  <!-- 02 -->
+  <div class="card">
+    <div class="card-title">02 — Content</div>
+    <div class="field">
+      <label>Short description <span>*</span><br><span style="font-weight:400;color:var(--muted)">Appears on the card on the main page</span></label>
+      <textarea id="description" rows="3" placeholder="Brief project description (2–4 lines)…"></textarea>
+    </div>
+    <div class="field">
+      <label>Materials / Stack used</label>
+      <textarea id="materials" rows="4" placeholder="• Processor: ESP32&#10;• Language: C++&#10;• Framework: FreeRTOS"></textarea>
+    </div>
+    <div class="field">
+      <label>Results achieved</label>
+      <textarea id="results" rows="3" placeholder="Describe the results, metrics, key learnings…"></textarea>
+    </div>
+    <div class="field">
+      <label>Detailed text <span style="font-weight:400;color:var(--muted)">(inner page — accepts Markdown)</span><br>
+      <span style="font-weight:400;color:var(--muted);font-size:11px">If left blank, it will be auto-generated from the fields above</span></label>
+      <textarea id="details" rows="8" placeholder="# Title&#10;&#10;## Description&#10;Full text here…"></textarea>
+    </div>
+  </div>
+
+  <!-- 03 -->
+  <div class="card">
+    <div class="card-title">03 — Technologies / Tags</div>
+    <div class="field">
+      <label>Type a tag and press <kbd style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:1px 6px;font-size:11px">Enter</kbd> ou <kbd style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:1px 6px;font-size:11px">,</kbd></label>
+      <div class="tags-input-wrap" id="tagsWrap" onclick="document.getElementById('tagInput').focus()">
+        <input type="text" id="tagInput" placeholder="ESP32, C++, MQTT…" autocomplete="off" />
+      </div>
+      <p class="tags-hint">Tags appear as filters in the portfolio</p>
+    </div>
+  </div>
+
+  <!-- 04 -->
+  <div class="card">
+    <div class="card-title">04 — Images</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Drag or select images. <strong style="color:var(--text)">Click an image to set it as the featured one</strong>.</p>
+    <div class="image-drop" id="imageDrop" onclick="document.getElementById('imageInput').click()">
+      <input type="file" id="imageInput" multiple accept="image/*" />
+      <div class="image-drop-icon">📁</div>
+      <p>Drag images here or <strong>click to select</strong></p>
+      <p style="margin-top:6px;font-size:12px;">JPG, PNG, WEBP — multiple files</p>
+    </div>
+    <div class="image-grid" id="imageGrid"></div>
+    <p class="images-hint" id="imagesHint" style="display:none">💡 Green border = featured image (appears on the card and at the top of the page)</p>
+  </div>
+
+  <button class="generate-btn" id="generateBtn" onclick="generate()">⚡ Generate &amp; Download ZIP</button>
+</div>
+
+<!-- OUTPUT -->
+<div id="output">
+  <div class="output-header">
+    <h2>✅ ZIP generated!</h2>
+    <p>Extract the ZIP inside <code style="background:#ffffff10;padding:2px 8px;border-radius:5px;font-family:'JetBrains Mono',monospace;font-size:13px">public/projects/</code> of the repository and update the manifest below.</p>
+  </div>
+
+  <div class="download-card">
+    <div class="download-info">
+      <h3 id="zipName">project05.zip</h3>
+      <p>Contains <code style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--green)">config.json</code>, <code style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--green)">text/details.md</code> and all images already in the correct structure</p>
+    </div>
+    <button class="download-btn" id="downloadBtn">⬇ Download ZIP</button>
+  </div>
+
+  <div class="steps-card">
+    <h3>📋 What to do now</h3>
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-text">Extract the ZIP into the folder <code>public/projects/</code> of your repository — the project folder will be created automatically</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-text">Open the file <code>public/projects/manifest.json</code> with any text editor (e.g. Notepad) and replace the contents with what is shown below</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-text">Open <strong>GitHub Desktop</strong>, write a commit message (e.g. "Add <span id="step-id-name">—</span>") and click <strong>Push origin</strong></div>
+    </div>
+  </div>
+
+  <div class="file-block">
+    <div class="file-header">
+      <span class="file-path">public/projects/manifest.json — full updated content</span>
+      <button class="copy-btn" onclick="copyEl('manifestContent', this)">Copy</button>
+    </div>
+    <pre id="manifestContent"></pre>
+  </div>
+</div>
+
+<script>
+// ── TAGS ─────────────────────────────────────────────────────
+const tags = [];
+const tagInput = document.getElementById('tagInput');
+const tagsWrap = document.getElementById('tagsWrap');
+
+function renderTags() {
+  document.querySelectorAll('.tag-pill').forEach(e => e.remove());
+  tags.forEach((tag, i) => {
+    const pill = document.createElement('div');
+    pill.className = 'tag-pill';
+    pill.innerHTML = `${tag}<button onclick="removeTag(${i})">×</button>`;
+    tagsWrap.insertBefore(pill, tagInput);
+  });
+}
+function addTag(val) {
+  const t = val.trim().replace(/,$/, '');
+  if (t && !tags.includes(t)) { tags.push(t); renderTags(); }
+  tagInput.value = '';
+}
+function removeTag(i) { tags.splice(i, 1); renderTags(); }
+tagInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addTag(tagInput.value); }
+  if (e.key === 'Backspace' && tagInput.value === '' && tags.length) { tags.pop(); renderTags(); }
+});
+tagInput.addEventListener('blur', () => { if (tagInput.value.trim()) addTag(tagInput.value); });
+
+// ── IMAGES ───────────────────────────────────────────────────
+const images = [];
+let featuredIndex = 0;
+const imageInput = document.getElementById('imageInput');
+const imageDrop  = document.getElementById('imageDrop');
+const imageGrid  = document.getElementById('imageGrid');
+const imagesHint = document.getElementById('imagesHint');
+
+imageInput.addEventListener('change', e => addImages(e.target.files));
+imageDrop.addEventListener('dragover', e => { e.preventDefault(); imageDrop.classList.add('drag-over'); });
+imageDrop.addEventListener('dragleave', () => imageDrop.classList.remove('drag-over'));
+imageDrop.addEventListener('drop', e => {
+  e.preventDefault(); imageDrop.classList.remove('drag-over');
+  addImages(e.dataTransfer.files);
+});
+function addImages(files) {
+  Array.from(files).forEach(file => {
+    if (!file.type.startsWith('image/')) return;
+    images.push({ file, name: file.name, url: URL.createObjectURL(file) });
+  });
+  renderImages();
+}
+function renderImages() {
+  imageGrid.innerHTML = '';
+  imagesHint.style.display = images.length ? 'block' : 'none';
+  images.forEach((img, i) => {
+    const div = document.createElement('div');
+    div.className = 'image-thumb' + (i === featuredIndex ? ' featured' : '');
+    div.title = 'Click to set as featured';
+    div.innerHTML = `
+      <img src="${img.url}" alt="${img.name}" />
+      ${i === featuredIndex ? '<div class="featured-badge">Featured</div>' : ''}
+      <button class="remove-btn" title="Remove" onclick="removeImage(event,${i})">×</button>`;
+    div.addEventListener('click', () => { featuredIndex = i; renderImages(); });
+    imageGrid.appendChild(div);
+  });
+}
+function removeImage(e, i) {
+  e.stopPropagation();
+  images.splice(i, 1);
+  if (featuredIndex >= images.length) featuredIndex = Math.max(0, images.length - 1);
+  renderImages();
+}
+
+// ── ID ───────────────────────────────────────────────────────
+function updateNextId() {
+  const last = parseInt(document.getElementById('lastId').value) || 0;
+  document.getElementById('nextIdDisplay').textContent = 'project' + String(last + 1).padStart(2, '0');
+}
+
+// ── GENERATE ─────────────────────────────────────────────────
+let zipBlob = null;
+let currentId = '';
+
+async function generate() {
+  const lastIdVal   = parseInt(document.getElementById('lastId').value) || 0;
+  const nextNum     = lastIdVal + 1;
+  const id          = 'project' + String(nextNum).padStart(2, '0');
+  const title       = document.getElementById('title').value.trim();
+  const category    = document.getElementById('category').value.trim();
+  const githubUrl   = document.getElementById('githubUrl').value.trim();
+  const description = document.getElementById('description').value.trim();
+  const materials   = document.getElementById('materials').value.trim();
+  const results     = document.getElementById('results').value.trim();
+  let   details     = document.getElementById('details').value.trim();
+
+  if (!title || !category || !description) {
+    alert('Please fill in at least: Title, Category and Description.');
+    return;
+  }
+
+  const btn = document.getElementById('generateBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Generating ZIP…';
+
+  try {
+    // Image order: featured first
+    const ordered = images.length
+      ? [images[featuredIndex], ...images.filter((_, i) => i !== featuredIndex)]
+      : [];
+    const featuredName = ordered.length ? ordered[0].name : '';
+    const otherNames   = ordered.slice(1).map(i => i.name);
+
+    // config.json
+    const config = {
+      title, category, description,
+      materials: materials || '',
+      results:   results   || '',
+      tech:      [...tags],
+      featuredImage: featuredName,
+      otherImages:   otherNames,
+    };
+    if (githubUrl) config.githubUrl = githubUrl;
+
+    // details.md — auto-generate if blank
+    if (!details) {
+      details = `# ${title}\n\n`;
+      if (description) details += `## Description\n${description}\n\n`;
+      if (materials)   details += `## Materials\n${materials}\n\n`;
+      if (results)     details += `## Results\n${results}\n`;
+    }
+
+    // Build ZIP
+    const zip = new JSZip();
+    const folder = zip.folder(id);
+    folder.file('config.json', JSON.stringify(config, null, 2));
+    folder.folder('text').file('details.md', details);
+
+    if (ordered.length) {
+      const imgFolder = folder.folder('images');
+      for (const img of ordered) {
+        imgFolder.file(img.name, await img.file.arrayBuffer());
+      }
+    }
+
+    zipBlob = await zip.generateAsync({ type: 'blob' });
+    currentId = id;
+
+    // Manifest: build list from 1..lastIdVal + new id
+    const existing = Array.from({ length: lastIdVal }, (_, i) =>
+      'project' + String(i + 1).padStart(2, '0')
+    );
+    document.getElementById('manifestContent').textContent =
+      JSON.stringify([...existing, id], null, 2);
+
+    // Update UI
+    document.getElementById('zipName').textContent = `${id}.zip`;
+    document.getElementById('step-id-name').textContent = id;
+    document.getElementById('downloadBtn').onclick = () => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(zipBlob);
+      a.download = `${currentId}.zip`;
+      a.click();
+    };
+
+    const out = document.getElementById('output');
+    out.classList.add('visible');
+    setTimeout(() => out.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+
+  } catch(err) {
+    alert('Error generating ZIP: ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '⚡ Generate &amp; Download ZIP';
+  }
+}
+
+// ── COPY ─────────────────────────────────────────────────────
+function copyEl(id, btn) {
+  navigator.clipboard.writeText(document.getElementById(id).textContent).then(() => {
+    btn.textContent = '✓ Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+</script>
+</body>
+</html>
